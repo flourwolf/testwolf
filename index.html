@@ -89,6 +89,13 @@ function startGame() {
 ================================ */
 function nextPhase() {
 
+  // 確認ダイアログ
+  const isOk = confirm("次のフェーズへ進みますか？");
+
+  // キャンセルなら何もしない
+  if (!isOk) return;
+
+  // ↓ ここから通常のフェーズ処理
   switch(state.phase) {
 
     case PHASE.PREPARE:
@@ -110,10 +117,8 @@ function nextPhase() {
     case PHASE.RESULT:
       return;
   }
-
-  // ★ 勝利判定（未実装）
+　//勝利判定未実装
   checkWin();
-
   render();
 }
 

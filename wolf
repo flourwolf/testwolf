@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>人狼フェーズ管理</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  font-family: sans-serif;
+  text-align: center;
+  padding: 20px;
+}
+
+button {
+  padding: 10px;
+  margin: 10px;
+  width: 220px;
+}
+
+.box {
+  border: 1px solid #ccc;
+  padding: 15px;
+  margin-top: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>人狼GMツール（フェーズ骨組み）</h1>
+
+<div class="box">
+  <h2 id="phase"></h2>
+  <div id="day"></div>
+</div>
+
+<div class="box">
+  <button onclick="startGame()">ゲーム開始</button>
+  <button onclick="nextPhase()">次のフェーズへ</button>
+  <button onclick="forceEnd()">強制終了（テスト）</button>
+</div>
+
+<script>
+
+/* ===============================
+   フェーズ定義
+================================ */
+const PHASE = {
+  PREPARE: "準備",
+  MORNING: "朝",
+  VOTE: "投票",
+  NIGHT: "夜",
+  RESULT: "終了"
+};
+
+/* ===============================
+   状態
+================================ */
+let state = {
+  phase: PHASE.PREPARE,
+  day: 0
+};
+
+/* ===============================
+   描画
+================================ */
+function render() {
+  document.getElementById("phase").innerText =
+    `フェーズ：${state.phase}`;
+
+  document.getElementById("day").innerText =
+    state.phase === PHASE.PREPARE || state.phase === PHASE.RESULT
+      ? ""
+      : `日数：${state.day}日目`;
+}
+
+/* ===============================
+   ゲーム開始
+================================ */
+function startGame() {
+  state.phase = PHASE.MORNING;
+  state.day = 1;
+  render();
+}
+
+/* ===============================
+   フェーズ遷移
+================================ */
+function nextPhase() {
+
+  switch(state.phase) {
+
+    case PHASE.PREPARE:
+      return;
+
+    case PHASE.MORNING:
+      state.phase = PHASE.VOTE;
+      break;
+
+    case PHASE.VOTE:
+      state.phase = PHASE.NIGHT;
+      break;
+
+    case PHASE.NIGHT:
+      state.phase = PHASE.MORNING;
+      state.day++;
+      break;
+
+    case PHASE.RESULT:
+      return;
+  }
+
+  // ★ 勝利判定（未実装）
+  checkWin();
+
+  render();
+}
+
+/* ===============================
+   勝利判定（空）
+================================ */
+function checkWin() {
+  // ここに後で勝利条件を書く
+  // 例：
+  // if (...) endGame("村人勝利");
+}
+
+/* ===============================
+   強制終了（テスト用）
+================================ */
+function forceEnd() {
+  endGame("（テスト）ゲーム終了");
+}
+
+/* ===============================
+   終了処理
+================================ */
+function endGame(message) {
+  state.phase = PHASE.RESULT;
+
+  document.getElementById("phase").innerText = message;
+  document.getElementById("day").innerText = "";
+}
+
+/* 初期描画 */
+render();
+
+</script>
+
+</body>
+</html>

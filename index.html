@@ -39,7 +39,7 @@ input, button, textarea {
   <div id="day"></div>
 </div>
 
-<!-- ===== 準備フェーズ：入力 ===== -->
+<!-- ===== 準備フェーズUI ===== -->
 <div id="prepareUI" class="box">
 
   <h2>ゲーム設定</h2>
@@ -47,25 +47,19 @@ input, button, textarea {
   シード値<br>
   <input id="seed"><br>
 
-  参加人数<br>
-  <input id="count" type="number" value="5" onchange="createInputs()"><br>
+  参加人数（5人～）<br>
+  <input id="count" type="number" min="5" value="5" onchange="createInputs()"><br>
 
   <div id="players"></div>
 
   <button onclick="generate()">役職生成</button>
 
-</div>
-
-<!-- ===== 役職一覧（常時表示したい） ===== -->
-<div id="resultUI" class="box">
   <h3>役職一覧（GM専用）</h3>
   <div id="result"></div>
-</div>
 
-<!-- ===== URL（常時表示したい） ===== -->
-<div id="urlUI" class="box">
   <h3>PL用URL</h3>
   <textarea id="url" rows="3"></textarea>
+
 </div>
 
 <!-- ===== 操作ボタン ===== -->
@@ -140,14 +134,16 @@ function render() {
     endBtn.style.display   = "none";
   }
 
-// ===== 準備UI制御 =====
-const prepareUI = document.getElementById("prepareUI");
+  // ===== 準備UI制御 =====
+  const prepareUI = document.getElementById("prepareUI");
 
-if (state.phase === PHASE.PREPARE) {
-  prepareUI.style.display = "block";
-} else {
-  prepareUI.style.display = "none";
+  if (state.phase === PHASE.PREPARE) {
+    prepareUI.style.display = "block";
+  } else {
+    prepareUI.style.display = "none";
+  }
 }
+
 /* ===============================
    プレイヤー入力欄生成
 ================================ */

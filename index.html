@@ -2,313 +2,747 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>人狼GMツール</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<meta name="color-scheme" content="light dark">
+<title>インサイダーゲーム</title>
 <style>
+:root {
+  --bg: #f3f5f8;
+  --panel: #ffffff;
+  --text: #1c2128;
+  --muted: #69737e;
+  --line: #dfe4ea;
+  --primary: #2f6fed;
+  --primary-text: #ffffff;
+  --villager: #2e7d32;
+  --insider: #c62828;
+  --master: #1565c0;
+  --villager-bg: #e8f5e9;
+  --insider-bg: #fdecea;
+  --master-bg: #e3f0fd;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #101419;
+    --panel: #1a2027;
+    --text: #e8ecf0;
+    --muted: #98a2ad;
+    --line: #2d363f;
+    --primary: #5b8def;
+    --primary-text: #0b1220;
+    --villager: #6fcf75;
+    --insider: #ff7b72;
+    --master: #6cb2ff;
+    --villager-bg: #17301b;
+    --insider-bg: #3a1b1a;
+    --master-bg: #14283f;
+  }
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
 body {
-  font-family: sans-serif;
+  margin: 0;
+  padding: 20px 16px 48px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif;
+  line-height: 1.5;
+  -webkit-tap-highlight-color: transparent;
+}
+main { max-width: 440px; margin: 0 auto; }
+h1 {
+  margin: 4px 0 16px;
+  font-size: 22px;
   text-align: center;
-  padding: 20px;
+  user-select: none;
 }
 
-input, button, textarea {
-  margin: 5px;
-  padding: 6px;
-  width: 90%;
-  max-width: 400px;
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 14px;
 }
 
-.box {
-  border: 1px solid #ccc;
-  padding: 15px;
-  margin-top: 20px;
-}
-
-.player { margin: 5px; }
-
-.playerBtn {
+label, .label {
   display: block;
-  margin: 5px auto;
-  padding: 10px;
+  margin: 12px 0 4px;
+  font-size: 13px;
+  color: var(--muted);
+}
+input[type="text"], input[type="number"], select {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  font-size: 16px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+input:focus-visible, select:focus-visible, button:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
-.dead {
-  background-color: #ccc;
-  color: #666;
+button {
+  width: 100%;
+  min-height: 46px;
+  margin-top: 10px;
+  padding: 8px 14px;
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  cursor: pointer;
 }
+button:active { transform: translateY(1px); }
+button:disabled { opacity: 0.4; cursor: default; }
+button.primary {
+  color: var(--primary-text);
+  background: var(--primary);
+  border-color: var(--primary);
+  font-weight: 700;
+}
+button.inline { width: auto; margin-top: 0; }
+
+.row { display: flex; gap: 8px; align-items: center; }
+.row input { flex: 1; min-width: 0; }
+.row button { width: auto; margin-top: 0; white-space: nowrap; }
+
+details > summary {
+  cursor: pointer;
+  font-weight: 700;
+  list-style: none;
+  user-select: none;
+}
+details > summary::-webkit-details-marker { display: none; }
+details > summary::before { content: "▸ "; color: var(--muted); }
+details[open] > summary::before { content: "▾ "; }
+
+.seg {
+  display: flex;
+  gap: 8px;
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+.seg label { flex: 1; margin: 0; }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg span {
+  display: block;
+  padding: 10px 6px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  cursor: pointer;
+}
+.seg input:checked + span {
+  color: var(--primary-text);
+  background: var(--primary);
+  border-color: var(--primary);
+  font-weight: 700;
+}
+.seg input:focus-visible + span { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.note {
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  font-size: 14px;
+  background: var(--master-bg);
+  color: var(--master);
+  border-radius: 10px;
+}
+.error { min-height: 1.4em; margin: 8px 0 0; font-size: 14px; color: var(--insider); }
+.small { font-size: 12px; color: var(--muted); }
+
+.roundbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.roundbar button { width: 84px; margin-top: 0; }
+.roundbar .mid { flex: 1; text-align: center; }
+.roundbar .big { font-size: 20px; font-weight: 700; }
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 230px;
+  margin: 0 0 14px;
+  padding: 20px 16px;
+  text-align: center;
+  color: var(--muted);
+  background: var(--panel);
+  border: 2px dashed var(--line);
+  border-radius: 20px;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+.card[data-role="villager"] { color: var(--villager); background: var(--villager-bg); border: 2px solid var(--villager); }
+.card[data-role="insider"]  { color: var(--insider);  background: var(--insider-bg);  border: 2px solid var(--insider); }
+.card[data-role="master"]   { color: var(--master);   background: var(--master-bg);   border: 2px solid var(--master); }
+.card .hint { font-size: 17px; }
+.card .role { font-size: 30px; font-weight: 800; }
+.card .word { font-size: 26px; font-weight: 800; word-break: break-all; }
+.card .tip { font-size: 13px; color: var(--text); opacity: 0.8; }
+.card .close { font-size: 12px; color: var(--muted); }
+
+.timer-text {
+  font-size: 48px;
+  font-weight: 800;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.timer-text.done { color: var(--insider); }
+.timer-btns { display: flex; gap: 8px; }
+.timer-btns button { margin-top: 8px; }
+.timer-set { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 14px; color: var(--muted); }
+.timer-set select { width: auto; min-height: 38px; }
+
+.rules ol { margin: 10px 0 0; padding-left: 20px; font-size: 14px; }
+.rules li { margin-bottom: 4px; }
+
+.footer { text-align: center; margin-top: 8px; }
+.footer button { width: auto; min-height: 32px; margin: 0 0 0 6px; padding: 2px 10px; font-size: 13px; }
+
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  padding: 10px 18px;
+  font-size: 14px;
+  color: #fff;
+  background: rgba(30, 36, 44, 0.92);
+  border-radius: 999px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+#toast.show { opacity: 1; }
 </style>
 </head>
-
 <body>
+<main>
+  <h1>インサイダーゲーム</h1>
 
-<h1>人狼GMツール</h1>
+  <!-- ===== 設定画面 ===== -->
+  <section id="setup" class="panel">
+    <p id="joinNote" class="note" hidden>部屋の設定を読み込みました。自分の参加番号を入れて始めましょう。</p>
 
-<!-- ===== フェーズ表示 ===== -->
-<div class="box">
-  <h2 id="phase"></h2>
-  <div id="day"></div>
-</div>
+    <details id="roomSettings" open>
+      <summary>部屋の設定</summary>
 
-<!-- ===== 準備UI ===== -->
-<div id="prepareUI" class="box">
+      <label for="seed">シード値（全員共通）</label>
+      <div class="row">
+        <input id="seed" type="text" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <button id="randomSeed" type="button">ランダム</button>
+      </div>
 
-  シード値<br>
-  <input id="seed"><br>
+      <label for="count">参加人数</label>
+      <input id="count" type="number" inputmode="numeric" min="3" max="30" value="5">
 
-  参加人数<br>
-  <input id="count" type="number" min="5" max="13" value="5" onchange="createInputs()"><br>
+      <div class="label">モード</div>
+      <fieldset class="seg">
+        <label><input type="radio" name="mode" value="normal" checked><span>通常（マスターが交代）</span></label>
+        <label><input type="radio" name="mode" value="fixed"><span>マスター固定</span></label>
+      </fieldset>
 
-  <div id="players"></div>
+      <div id="masterNumberBox" hidden>
+        <label for="masterNumber">マスターの参加番号</label>
+        <input id="masterNumber" type="number" inputmode="numeric" min="1">
+      </div>
+    </details>
 
-  <button onclick="generate()">役職生成</button>
+    <button id="share" type="button">配布用URLをコピー（番号は含みません）</button>
 
-  <h3>役職一覧</h3>
-  <div id="result"></div>
+    <label for="number">自分の参加番号</label>
+    <input id="number" type="number" inputmode="numeric" min="1">
 
-  <h3>PL用URL</h3>
-  <textarea id="url" rows="3"></textarea>
+    <p id="error" class="error" role="alert"></p>
+    <button id="start" type="button" class="primary">役職を確認</button>
+  </section>
 
-</div>
+  <!-- ===== ゲーム画面 ===== -->
+  <section id="game" hidden>
+    <div class="roundbar">
+      <button id="prevRound" type="button" aria-label="前のラウンド">‹ 前へ</button>
+      <div class="mid">
+        <div class="big">ラウンド <span id="round">1</span></div>
+        <div class="small">全員が同じ番号か確認してね</div>
+      </div>
+      <button id="nextRound" type="button" aria-label="次のラウンド">次へ ›</button>
+    </div>
 
-<!-- ===== 共通UI（安全版） ===== -->
-<div id="gameUI" class="box" style="display:none;">
+    <button id="card" class="card" type="button" aria-live="polite">
+      <span id="cardHint" class="hint">タップして役職を見る</span>
+      <span id="cardRole" class="role" hidden></span>
+      <span id="cardWord" class="word" hidden></span>
+      <span id="cardTip" class="tip" hidden></span>
+      <span id="cardClose" class="close" hidden>もう一度タップで隠す（10秒で自動的に隠れます）</span>
+    </button>
 
-  <h3>プレイヤー</h3>
-  <div id="playerList"></div>
+    <div class="panel">
+      <div id="timerText" class="timer-text">5:00</div>
+      <div class="timer-btns">
+        <button id="timerToggle" type="button" class="primary">開始</button>
+        <button id="timerReset" type="button">リセット</button>
+      </div>
+      <div class="timer-set">
+        制限時間
+        <select id="minutes" aria-label="制限時間（分）">
+          <option value="3">3分</option>
+          <option value="4">4分</option>
+          <option value="5" selected>5分</option>
+          <option value="6">6分</option>
+          <option value="7">7分</option>
+          <option value="10">10分</option>
+        </select>
+        <span class="small">※タイマーはこの端末だけで動きます</span>
+      </div>
+    </div>
 
-  <h3>PL用URL</h3>
-  <textarea id="urlDisplay" rows="3" readonly></textarea>
+    <details class="panel rules">
+      <summary>ルールのおさらい</summary>
+      <ol>
+        <li>マスターはお題を知っていて、質問には「はい」「いいえ」「どちらでもない」だけで答える。</li>
+        <li>インサイダーもお題を知っている。正体を隠しながら、村人を正解へ導く。</li>
+        <li>制限時間内にお題を当てられたら、話し合いで投票してインサイダーを探す。</li>
+        <li>時間内に当てられなかったら、全員の負け。</li>
+      </ol>
+    </details>
 
-</div>
+    <button id="back" type="button">設定に戻る（ラウンドを1に戻します）</button>
+  </section>
 
-<!-- ===== 操作 ===== -->
-<div class="box">
-  <button id="startBtn" onclick="startGame()">ゲーム開始</button>
-  <button id="nextBtn" onclick="nextPhase()">次のフェーズへ</button>
-  <button id="endBtn" onclick="forceEnd()">強制終了</button>
-</div>
+  <div class="footer small">
+    <span id="wordsStatus">お題リストを読み込み中…</span>
+    <button id="wordsRetry" type="button" hidden>再読み込み</button>
+  </div>
+</main>
+
+<div id="toast" role="status"></div>
 
 <script>
+'use strict';
 
-/* ===============================
-   フェーズ
-================================ */
-const PHASE = {
-  PREPARE: "準備",
-  MORNING: "朝",
-  VOTE: "投票",
-  NIGHT: "夜",
-  RESULT: "終了"
-};
-
-/* ===============================
-   状態
-================================ */
-let state = {
-  phase: PHASE.PREPARE,
-  day: 0,
-  players: [],
-  roles: [],
-  alive: [],
-  url: ""
-};
-
-/* ===============================
-   描画（UIのみ）
-================================ */
-function render() {
-
-  document.getElementById("phase").innerText =
-    `フェーズ：${state.phase}`;
-
-  document.getElementById("day").innerText =
-    (state.phase === PHASE.PREPARE || state.phase === PHASE.RESULT)
-      ? ""
-      : `日数：${state.day}日目`;
-
-  // ボタン制御
-  const startBtn = document.getElementById("startBtn");
-  const nextBtn  = document.getElementById("nextBtn");
-  const endBtn   = document.getElementById("endBtn");
-
-  if (state.phase === PHASE.PREPARE) {
-    startBtn.style.display = "inline-block";
-    nextBtn.style.display  = "none";
-    endBtn.style.display   = "none";
-  } else if (state.phase === PHASE.RESULT) {
-    startBtn.style.display = "inline-block";
-    nextBtn.style.display  = "none";
-    endBtn.style.display   = "none";
-  } else {
-    startBtn.style.display = "none";
-    nextBtn.style.display  = "inline-block";
-    endBtn.style.display   = "inline-block";
+// ================================
+// コア（全員の端末で同じ結果になる部分）
+// ================================
+// CORE START
+function hashString(str) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
   }
-
-  // UI切替
-  document.getElementById("prepareUI").style.display =
-    (state.phase === PHASE.PREPARE) ? "block" : "none";
-
-  const gameUI = document.getElementById("gameUI");
-  gameUI.style.display =
-    (state.phase !== PHASE.PREPARE && state.phase !== PHASE.RESULT)
-      ? "block" : "none";
-
-  // 共通UI描画
-  if (state.players.length > 0) {
-
-    const playerList = document.getElementById("playerList");
-    playerList.innerHTML = "";
-
-    state.players.forEach((p, i) => {
-      const btn = document.createElement("button");
-      btn.className = "playerBtn";
-
-      if (!state.alive[i]) btn.classList.add("dead");
-
-      btn.textContent = `${i+1}番：${p}`;
-      btn.onclick = () => console.log(p);
-
-      playerList.appendChild(btn);
-    });
-
-    document.getElementById("urlDisplay").value = state.url;
-  }
+  h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b);
+  h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35);
+  h ^= h >>> 16;
+  return h >>> 0;
 }
 
-/* ===============================
-   入力欄生成
-================================ */
-function createInputs() {
-  const count = Number(document.getElementById("count").value);
-  const div = document.getElementById("players");
-  div.innerHTML = "";
-
-  for (let i = 0; i < count; i++) {
-    div.innerHTML += `<input class="player" placeholder="プレイヤー名${i+1}">`;
-  }
-}
-createInputs();
-
-/* ===============================
-   シード乱数
-================================ */
-function seededRandom(seed) {
-  let t = seed;
-  return function() {
-    t += 0x6D2B79F5;
-    let r = Math.imul(t ^ t >>> 15, 1 | t);
-    r ^= r + Math.imul(r ^ r >>> 7, 61 | r);
-    return ((r ^ r >>> 14) >>> 0) / 4294967296;
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
 
-/* ===============================
-   役職生成
-================================ */
-function generate() {
-
-  const seedText = document.getElementById("seed").value;
-  const count = Number(document.getElementById("count").value);
-  const inputs = document.querySelectorAll(".player");
-
-  const names = Array.from(inputs).map(i => i.value.trim());
-
-  if (!seedText) return alert("シード値を入力してください");
-  if (names.includes("")) return alert("名前を入力してください");
-  if (new Set(names).size !== names.length) return alert("名前が重複しています");
-
-  const roleConfig = {
-    5:["村人","村人","村人","占い師","人狼"],
-    6:["村人","村人","村人","村人","占い師","人狼"],
-    7:["村人","村人","村人","村人","占い師","人狼","狂人"],
-    8:["村人","村人","村人","村人","占い師","霊能者","人狼","人狼"],
-    9:["村人","村人","村人","村人","占い師","霊能者","人狼","人狼","狂人"],
-    10:["村人","村人","村人","村人","村人","占い師","霊能者","人狼","人狼","狂人"],
-    11:["村人","村人","村人","村人","村人","占い師","霊能者","狩人","人狼","人狼","狂人"],
-    12:["村人","村人","村人","村人","村人","村人","占い師","霊能者","狩人","人狼","人狼","狂人"],
-    13:["村人","村人","村人","村人","村人","村人","占い師","霊能者","狩人","人狼","人狼","人狼","狂人"],
-  };
-
-  if (!roleConfig[count]) {
-    alert("この人数には未対応です");
-    return;
-  }
-
-  let seed = 0;
-  for (let c of seedText) seed += c.charCodeAt(0);
-  const rand = seededRandom(seed);
-
-  let roles = [...roleConfig[count]];
-
-  for (let i = roles.length - 1; i > 0; i--) {
+function shuffled(arr, rand) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(rand() * (i + 1));
-    [roles[i], roles[j]] = [roles[j], roles[i]];
+    [a[i], a[j]] = [a[j], a[i]];
   }
-
-  state.players = names;
-  state.roles = roles;
-  state.alive = names.map(() => true);
-
-  // URL
-  const params = new URLSearchParams();
-  params.set("seed", seedText);
-  params.set("names", names.join(","));
-  params.set("count", count);
-
-  const url = location.origin + location.pathname.replace("index.html","") +
-              "player.html?" + params.toString();
-
-  state.url = url;
-  document.getElementById("url").value = url;
-
-  // 表示
-  const result = document.getElementById("result");
-  result.innerHTML = "";
-  names.forEach((n,i)=>{
-    result.innerHTML += `${n} → ${roles[i]}<br>`;
-  });
+  return a;
 }
 
-/* ===============================
-   ゲーム開始
-================================ */
+// 全角/半角のゆれや前後の空白で結果が変わらないようにする
+function normalizeSeed(s) {
+  return String(s).normalize('NFKC').trim();
+}
+
+// cfg = { seed, count, mode: 'normal' | 'fixed', master }
+// round は 1 始まり。{ master, insider, word } を返す
+function computeRound(cfg, round, words) {
+  const players = [];
+  for (let i = 1; i <= cfg.count; i++) players.push(i);
+
+  let master;
+  if (cfg.mode === 'fixed') {
+    master = cfg.master;
+  } else {
+    // 全員が順番にマスターになる並びを、シード値から1回だけ決める
+    const order = shuffled(players, mulberry32(hashString(cfg.seed + '|order|' + cfg.count)));
+    master = order[(round - 1) % order.length];
+  }
+
+  const others = players.filter(p => p !== master);
+  const r = mulberry32(hashString(
+    cfg.seed + '|insider|' + cfg.count + '|' + cfg.mode + '|' + master + '|' + round
+  ));
+  const insider = others[Math.floor(r() * others.length)];
+
+  let word = '';
+  if (words.length) {
+    // お題も並びを1回だけ決め、ラウンドごとに先頭から使う（同じお題が続かない）
+    const idx = [];
+    for (let i = 0; i < words.length; i++) idx.push(i);
+    const perm = shuffled(idx, mulberry32(hashString(cfg.seed + '|words|' + words.length)));
+    word = words[perm[(round - 1) % perm.length]];
+  }
+  return { master: master, insider: insider, word: word };
+}
+// CORE END
+
+// ================================
+// 画面まわり
+// ================================
+const $ = id => document.getElementById(id);
+const state = { cfg: null, number: 0, round: 1 };
+let words = [];
+let hideTimer = null;
+let toastTimer = null;
+
+function setError(msg) { $('error').textContent = msg || ''; }
+
+function toast(msg) {
+  const el = $('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
+}
+
+function randomSeed() {
+  const chars = 'abcdefghjkmnpqrstuvwxyz23456789';
+  const buf = new Uint32Array(5);
+  (window.crypto || window.msCrypto).getRandomValues(buf);
+  return Array.from(buf, n => chars[n % chars.length]).join('');
+}
+
+// ---------- お題リスト ----------
+function loadWords() {
+  $('wordsStatus').textContent = 'お題リストを読み込み中…';
+  $('wordsRetry').hidden = true;
+  return fetch('words.txt', { cache: 'no-cache' })
+    .then(res => {
+      if (!res.ok) throw new Error('words.txt が読み込めません (' + res.status + ')');
+      return res.text();
+    })
+    .then(text => {
+      const list = text.split(/\r?\n/).map(w => w.trim()).filter(Boolean);
+      words = Array.from(new Set(list));
+      if (!words.length) throw new Error('words.txt が空です');
+      $('wordsStatus').textContent = 'お題リスト：' + words.length + '語';
+    })
+    .catch(err => {
+      console.error(err);
+      words = [];
+      $('wordsStatus').textContent = 'お題リストを読み込めませんでした';
+      $('wordsRetry').hidden = false;
+    });
+}
+
+// ---------- 入力の読み取り ----------
+function readConfig() {
+  const seed = normalizeSeed($('seed').value);
+  const count = parseInt($('count').value, 10);
+  const mode = document.querySelector('input[name="mode"]:checked').value;
+  const master = parseInt($('masterNumber').value, 10);
+
+  if (!seed) return { error: 'シード値を入力してください' };
+  if (!(count >= 3 && count <= 30)) return { error: '参加人数は3〜30人で入力してください' };
+
+  const cfg = { seed: seed, count: count, mode: mode, master: 0 };
+  if (mode === 'fixed') {
+    if (!(master >= 1 && master <= count)) {
+      return { error: 'マスターの参加番号は1〜' + count + 'で入力してください' };
+    }
+    cfg.master = master;
+  }
+  return { cfg: cfg };
+}
+
+function buildUrl(cfg) {
+  const params = new URLSearchParams();
+  params.set('seed', cfg.seed);
+  params.set('count', cfg.count);
+  params.set('mode', cfg.mode);
+  if (cfg.mode === 'fixed') params.set('master', cfg.master);
+  const base = location.href.split(/[?#]/)[0];
+  return base + '?' + params.toString();
+}
+
+function syncModeBox() {
+  const fixed = document.querySelector('input[name="mode"]:checked').value === 'fixed';
+  $('masterNumberBox').hidden = !fixed;
+}
+
+// ---------- 端末への保存（再読み込み対策） ----------
+function storeKey(cfg) {
+  return 'insider:' + cfg.seed + '|' + cfg.count + '|' + cfg.mode + '|' + cfg.master;
+}
+function saveState() {
+  try {
+    localStorage.setItem(storeKey(state.cfg), JSON.stringify({ number: state.number, round: state.round }));
+  } catch (e) { /* 保存できなくても動く */ }
+}
+function loadSaved(cfg) {
+  try {
+    const v = localStorage.getItem(storeKey(cfg));
+    return v ? JSON.parse(v) : null;
+  } catch (e) { return null; }
+}
+
+// ---------- 配布URL ----------
+function shareUrl() {
+  setError('');
+  const r = readConfig();
+  if (r.error) { setError(r.error); return; }
+  const url = buildUrl(r.cfg);
+  const fallback = () => window.prompt('このURLを共有してください', url);
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(() => toast('配布用URLをコピーしました'), fallback);
+  } else {
+    fallback();
+  }
+}
+
+// ---------- ゲーム開始・ラウンド ----------
 function startGame() {
-  if (state.players.length === 0) {
-    alert("役職生成してください");
+  setError('');
+  const r = readConfig();
+  if (r.error) { setError(r.error); return; }
+  const n = parseInt($('number').value, 10);
+  if (!(n >= 1 && n <= r.cfg.count)) {
+    setError('自分の参加番号は1〜' + r.cfg.count + 'で入力してください');
     return;
   }
+  if (!words.length) { setError('お題リストがまだ読み込まれていません'); return; }
 
-  state.phase = PHASE.MORNING;
-  state.day = 1;
-  render();
+  state.cfg = r.cfg;
+  state.number = n;
+  const saved = loadSaved(r.cfg);
+  state.round = (saved && saved.number === n && saved.round >= 1) ? saved.round : 1;
+
+  try { history.replaceState(null, '', buildUrl(r.cfg)); } catch (e) { /* file:// など */ }
+
+  $('setup').hidden = true;
+  $('game').hidden = false;
+  renderRound();
+  saveState();
+  window.scrollTo(0, 0);
 }
 
-/* ===============================
-   フェーズ遷移
-================================ */
-function nextPhase() {
+function backToSetup() {
+  hideCard();
+  stopTimer();
+  state.round = 1;
+  saveState();
+  $('game').hidden = true;
+  $('setup').hidden = false;
+}
 
-  if (!confirm("次へ進みますか？")) return;
+function renderRound() {
+  $('round').textContent = state.round;
+  $('prevRound').disabled = state.round <= 1;
+  hideCard();
+  resetTimer();
+}
 
-  if (state.phase === PHASE.MORNING) state.phase = PHASE.VOTE;
-  else if (state.phase === PHASE.VOTE) state.phase = PHASE.NIGHT;
-  else if (state.phase === PHASE.NIGHT) {
-    state.phase = PHASE.MORNING;
-    state.day++;
+function changeRound(delta) {
+  const next = Math.max(1, state.round + delta);
+  if (next === state.round) return;
+  state.round = next;
+  renderRound();
+  saveState();
+}
+
+// ---------- 役職カード ----------
+function hideCard() {
+  clearTimeout(hideTimer);
+  const card = $('card');
+  card.dataset.open = '0';
+  card.removeAttribute('data-role');
+  ['cardRole', 'cardWord', 'cardTip', 'cardClose'].forEach(id => {
+    $(id).hidden = true;
+    $(id).textContent = id === 'cardClose' ? $(id).textContent : '';
+  });
+  $('cardHint').hidden = false;
+}
+
+function revealCard() {
+  const r = computeRound(state.cfg, state.round, words);
+  let role = 'villager', label = '村人', showWord = false;
+  let tip = '質問してお題を当てよう。インサイダーを見抜くことも忘れずに。';
+
+  if (state.number === r.master) {
+    role = 'master'; label = 'マスター'; showWord = true;
+    tip = '質問には「はい」「いいえ」「どちらでもない」だけで答えます。';
+  } else if (state.number === r.insider) {
+    role = 'insider'; label = 'インサイダー'; showWord = true;
+    tip = '知っていることを隠して、村人を正解へ導きましょう。';
   }
 
-  render();
+  const card = $('card');
+  card.dataset.open = '1';
+  card.dataset.role = role;
+  $('cardHint').hidden = true;
+  $('cardRole').textContent = 'あなたは「' + label + '」';
+  $('cardRole').hidden = false;
+  if (showWord) {
+    $('cardWord').textContent = 'お題：' + r.word;
+    $('cardWord').hidden = false;
+  }
+  $('cardTip').textContent = tip;
+  $('cardTip').hidden = false;
+  $('cardClose').hidden = false;
+
+  clearTimeout(hideTimer);
+  hideTimer = setTimeout(hideCard, 10000);
 }
 
-/* =============================== */
-function forceEnd(){ state.phase = PHASE.RESULT; render(); }
+function toggleCard() {
+  if ($('card').dataset.open === '1') hideCard(); else revealCard();
+}
 
-/* 初期描画 */
-render();
+// ---------- タイマー ----------
+let timerLeft = 5 * 60 * 1000;
+let timerEnd = 0;
+let timerId = null;
+let audioCtx = null;
 
+function fmt(ms) {
+  const s = Math.ceil(ms / 1000);
+  return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+}
+
+function renderTimer() {
+  const el = $('timerText');
+  el.textContent = timerLeft <= 0 ? '時間切れ！' : fmt(timerLeft);
+  el.classList.toggle('done', timerLeft <= 0);
+  $('timerToggle').textContent = timerId ? '一時停止' : (timerLeft <= 0 ? '終了' : '開始');
+  $('timerToggle').disabled = timerLeft <= 0 && !timerId;
+}
+
+function beep() {
+  if (!audioCtx) return;
+  try {
+    [0, 0.25, 0.5].forEach(t => {
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.frequency.value = 880;
+      g.gain.value = 0.15;
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start(audioCtx.currentTime + t);
+      o.stop(audioCtx.currentTime + t + 0.15);
+    });
+  } catch (e) { /* 音が出なくても動く */ }
+}
+
+function tick() {
+  timerLeft = timerEnd - Date.now();
+  if (timerLeft <= 0) {
+    timerLeft = 0;
+    stopTimer();
+    beep();
+    if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 300]);
+  }
+  renderTimer();
+}
+
+function startTimer() {
+  if (timerId || timerLeft <= 0) return;
+  try {
+    if (!audioCtx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) audioCtx = new AC();
+    }
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  } catch (e) { /* 無視 */ }
+  timerEnd = Date.now() + timerLeft;
+  timerId = setInterval(tick, 200);
+  renderTimer();
+}
+
+function stopTimer() {
+  if (timerId) { clearInterval(timerId); timerId = null; }
+}
+
+function pauseTimer() {
+  if (!timerId) return;
+  timerLeft = Math.max(0, timerEnd - Date.now());
+  stopTimer();
+  renderTimer();
+}
+
+function resetTimer() {
+  stopTimer();
+  timerLeft = parseInt($('minutes').value, 10) * 60 * 1000;
+  renderTimer();
+}
+
+// ---------- イベント ----------
+$('randomSeed').addEventListener('click', () => { $('seed').value = randomSeed(); });
+document.querySelectorAll('input[name="mode"]').forEach(r => r.addEventListener('change', syncModeBox));
+$('share').addEventListener('click', shareUrl);
+$('start').addEventListener('click', startGame);
+$('number').addEventListener('keydown', e => { if (e.key === 'Enter') startGame(); });
+$('back').addEventListener('click', backToSetup);
+$('prevRound').addEventListener('click', () => changeRound(-1));
+$('nextRound').addEventListener('click', () => changeRound(1));
+$('card').addEventListener('click', toggleCard);
+$('timerToggle').addEventListener('click', () => { if (timerId) pauseTimer(); else startTimer(); });
+$('timerReset').addEventListener('click', resetTimer);
+$('minutes').addEventListener('change', () => { if (!timerId) resetTimer(); });
+$('wordsRetry').addEventListener('click', loadWords);
+document.addEventListener('visibilitychange', () => { if (document.hidden) hideCard(); });
+
+// ---------- 起動時：URLから復元 ----------
+function init() {
+  const p = new URLSearchParams(location.search);
+  const hasRoom = !!(p.get('seed') && p.get('count'));
+
+  $('seed').value = p.get('seed') || randomSeed();
+  if (p.get('count')) $('count').value = p.get('count');
+  const mode = p.get('mode') === 'fixed' ? 'fixed' : 'normal';
+  document.querySelector('input[name="mode"][value="' + mode + '"]').checked = true;
+  if (p.get('master')) $('masterNumber').value = p.get('master');
+  syncModeBox();
+
+  if (hasRoom) {
+    $('joinNote').hidden = false;
+    $('roomSettings').open = false;
+    const r = readConfig();
+    if (r.cfg) {
+      const saved = loadSaved(r.cfg);
+      if (saved && saved.number) $('number').value = saved.number;
+    }
+  }
+
+  renderTimer();
+  loadWords();
+}
+init();
 </script>
-
 </body>
 </html>

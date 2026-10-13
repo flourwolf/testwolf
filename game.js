@@ -1,4 +1,3 @@
-
 import { db } from "./firebase.js";
 
 import {
@@ -6,7 +5,8 @@ import {
   setDoc,
   updateDoc,
   onSnapshot
-} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js";
+
 
 let roomRef = null;
 let unsubscribe = null;

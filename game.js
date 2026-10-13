@@ -70,3 +70,7 @@ document.getElementById("nightButton").onclick = async () => {
     alert("変更できませんでした");
   }
 };
+
+document.getElementById("status").textContent =
+  "JavaScriptは正常に読み込まれました！";
+console.log("game.js 読み込み成功");

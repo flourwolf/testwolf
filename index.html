@@ -1,57 +1,27 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>人狼ゲーム・接続テスト</title>
-  <style>
-    body {
-      max-width: 640px;
-      margin: 40px auto;
-      padding: 0 20px;
-      font-family: system-ui, sans-serif;
-      line-height: 1.6;
-      color: #222;
-    }
-    input, button {
-      font: inherit;
-      padding: 8px 12px;
-      margin: 4px 4px 4px 0;
-    }
-    #status {
-      padding: 10px 12px;
-      background: #f2f4f7;
-      border-radius: 6px;
-      overflow-wrap: anywhere;
-    }
-    #phase {
-      font-size: 1.5rem;
-      font-weight: bold;
-    }
-    .note {
-      color: #555;
-      font-size: 0.92rem;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>コヨーテ | 夜の焚き火ゲーム</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@600;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>人狼ゲーム・接続テスト</h1>
 
-  <label for="roomId">部屋番号：</label>
-  <input id="roomId" value="test-room" autocomplete="off">
-  <button id="joinButton" type="button">部屋に接続</button>
+<div class="sky" aria-hidden="true">
+  <div class="moon"></div>
+  <div class="stars"></div>
+</div>
 
-  <p id="status" role="status" aria-live="polite">JavaScriptを読み込んでいます...</p>
+<main id="app" class="app"></main>
 
-  <h2>現在のフェーズ</h2>
-  <p id="phase">未接続</p>
+<script src="script.js"></script>
+</body>
+</html>
 
-  <button id="dayButton" type="button">昼にする</button>
-  <button id="nightButton" type="button">夜にする</button>
-
-  <p class="note">
-    テスト用の画面です。同じ部屋番号で複数のブラウザから接続すると、フェーズの変更が共有されます。
-  </p>
 
   <script type="module" src="./game.js"></script>
 </body>
